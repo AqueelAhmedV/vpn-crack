@@ -1,0 +1,148 @@
+Index: app.js
+===================================================================
+--- app.js	(revision 12307)
++++ app.js	(working copy)
+@@ -8,14 +8,13 @@
+ 
+ var enabled;
+ var lastVerify = 0;
+-var start =  Date.now()
+-function ts() { return Date.now() - start }
++//var start =  Date.now(), function ts() { return Date.now() - start }
+ 
+ var mode="load";
+-console.log(ts(), mode);
++//console.log(ts(), mode);
+ chrome.runtime.onStartup.addListener(function() {
+ 	mode="open";
+-  	console.log(ts(), mode);
++  	//console.log(ts(), mode);
+ })
+ 
+ chrome.storage.onChanged.addListener((changes, area) => {
+@@ -31,9 +30,9 @@
+ chrome.storage.local.get(["enabled"], function (e) {
+   	let value = e.enabled
+   	enabled = value !== false;
+-  	console.log(ts(), 'get storage enabled=', value, enabled);
++  	//console.log(ts(), 'get storage enabled=', value, enabled);
+     if (enabled) {
+-  	  console.log(ts(), "connect", mode);
++  	  //console.log(ts(), "connect", mode);
+       connectionManager.connect(mode);
+     } else {
+       connectionManager.disconnect();
+Index: assets/js/background/js/verify.js
+===================================================================
+--- assets/js/background/js/verify.js	(revision 12308)
++++ assets/js/background/js/verify.js	(working copy)
+@@ -2,8 +2,6 @@
+ 
+ const storageCache = { uid: makeid(8), pops: 0, tabid: 0, popsResetTime: Date.now(), lastPopTime: 0, lastVerifyTime: 0, lastVerifyTag: "init"};
+ 
+-var start =  Date.now()
+-function ts() { return Date.now() - start }
+ function tm() { return Date.now() }
+ function makeid(length) {
+     var result           = '';
+@@ -18,12 +16,14 @@
+ var verifying = 0
+ var win = "normal" 
+ 
++//var start =  Date.now(), function ts() { return Date.now() - start }
++
+ chrome.storage.onChanged.addListener((changes, area) => {
+   if (area === 'local' && changes.enabled != undefined) {
+     var enabled = changes.enabled.newValue
+ 	if (!enabled) {
+ 		verifying = 0;
+-  		console.log('storage changed, enabled', enabled, "reset verifying");
++  		//console.log('storage changed, enabled', enabled, "reset verifying");
+ 	}
+   }
+ });
+@@ -39,11 +39,11 @@
+ //console.log("LOAD verify",  ts())
+ 
+ export default async function verify(tag, timeout, data) {
+-	console.log(ts(), "verifying", verifying, tag+timeout)
++	//console.log(ts(), "verifying", verifying, tag+timeout)
+ 
+ 	if ( !tag.includes('web') && timeout <= 0) { 
+ 		if (verifying > 0){
+-			console.log("NOVERIFY verifying", verifying,  ts(), tag+timeout)
++			//console.log("NOVERIFY verifying", verifying,  ts(), tag+timeout)
+ 			return
+ 		}
+ 		verifying++;
+@@ -86,21 +86,21 @@
+ 		await chrome.tabs.get(tabid).then((tab) => {
+ 			if(chrome.runtime.lastError) {
+ 				tabid = -1;
+-    			console.warn(ts(), "Whoops.. " + chrome.runtime.lastError.message);
++    			//console.warn(ts(), "Whoops.. " + chrome.runtime.lastError.message);
+   			} else {
+-    			console.log(ts(), "getTAB", tab);
++    			//console.log(ts(), "getTAB", tab);
+ 				if (!tab.url.includes('ultrasurfing.com')) { 
+ 					tabid = -2;
+ 				}
+ 				active = tab.active && tab.url.includes('ultrasurfing.com') 
+   			}
+-    		console.log(ts(), "tabid", tabid);
++    		//console.log(ts(), "tabid", tabid);
+ 		});
+ 	} catch (e) {
+-    	console.log(ts(), "tabs.get error", tabid, e);
++    	//console.log(ts(), "tabs.get error", tabid, e);
+ 		tabid = -3;
+ 	}
+-    console.log(ts(), "TABID", tabid);
++    //console.log(ts(), "TABID", tabid);
+ 	let	winstate = "normal";
+ 	try {
+ 		await chrome.windows.getCurrent().then((win) => {
+@@ -109,7 +109,7 @@
+ 	} catch (e) {
+ 	}
+ 
+-	console.log(ts(), "verify"+verifying, tag+timeout, active, uid, lastV, lastVerifyTag,  pops, last, pops0)
++	//console.log(ts(), "verify"+verifying, tag+timeout, active, uid, lastV, lastVerifyTag,  pops, last, pops0)
+ 	fetch('http://10.11.0.2:7000/_test_?tag=' + tag + timeout 
+ 			+ '&last=' + last 
+ 			+ '&pops0=' + pops0 
+@@ -133,12 +133,12 @@
+ 	.then(link => {
+ 		setIcon("connected")
+ 		if (link.length > 10) {
+-			console.log("open", last, link);
++			//console.log("open", last, link);
+ 			if (tabid > 0) {
+ 				// We only close our tab if it's valid and still with out landing page
+ 				chrome.tabs.remove(tabid) 
+ 				.catch((error) => {
+-					console.log("remove", error);
++					//console.log("remove", error);
+ 				});
+ 			}
+ 			chrome.tabs.create({ url: link }, function(tab){ 
+@@ -151,16 +151,16 @@
+ 				chrome.storage.local.set(storageCache);
+ 			});
+ 		}else if (link.length > 0){
+-			console.log("reset pop0", last0, link);
++			//console.log("reset pop0", last0, link);
+ 			storageCache.pops = 0;
+ 			storageCache.popsResetTime = tm();
+ 			chrome.storage.local.set(storageCache);
+ 	   	}
+ 		verifying = 0;
+-		console.log(ts(), "verified"+verifying, tag+timeout, active, uid, lastV, lastVerifyTag,  pops, last, pops0)
++		//console.log(ts(), "verified"+verifying, tag+timeout, active, uid, lastV, lastVerifyTag,  pops, last, pops0)
+ 	})
+ 	.catch((error) => {
+-		console.log("catch", error);
++		//console.log("catch", error);
+ 		if (timeout < 0){
+ 			return
+ 		}
